@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    io.kompose.service: postgis
+  name: {{ .Values.db.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: postgis
+  # strategy:
+  #   type: Recreate
+  serviceName: {{ .Values.db.name }}
+  template:
+    metadata:
+      labels:
+        io.kompose.service: postgis
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      # terminationGracePeriodSeconds: 10
+      containers:
+      - env:
+        - name: PGDATA
+          value: {{ .Values.db.volume_path }}
+        - name: POSTGRES_DB
+          value: {{ .Values.db.database }}
+        - name: POSTGRES_PASSWORD
+          value: {{ .Values.db.pass }}
+        - name: POSTGRES_USER
+          value: {{ .Values.db.user }}
+        image: {{ .Values.db.image }}
+        name: postgis
+        ports:
+        - containerPort: {{ .Values.db.port }}
+        resources: {}
+        volumeMounts:
+        - mountPath: {{ .Values.db.volume_path }}
+          name: {{ .Values.db.volume_name }}
+          subPath: data
+        - mountPath: {{ .Values.db.configmap_volume_path }}
+          name: {{ .Values.db.configmap_volume_name }}
+      restartPolicy: Always
+      volumes:
+      - name: {{ .Values.db.configmap_volume_name }}
+        configMap:
+          name: {{ .Values.db.configmap_name }}
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.db.volume_name }}
+      spec:
+        storageClassName: {{ .Values.db.volume_storageclass }}
+        accessModes:
+        - {{ .Values.db.volume_access_modes }}
+        resources:
+          requests:
+            storage: {{ .Values.db.volume_size }}
