@@ -1,0 +1,159 @@
+# vim: set filetype=helm:
+
+{{- $fullname := (include "keycloak.fullname" .) -}}
+{{- $serviceName := (include "keycloak.serviceName" .) -}}
+{{- $serviceDomain := (include "keycloak.serviceDomain" .) -}}
+{{- $serviceFQName := (printf "%s.%s" $serviceName $serviceDomain) }}
+{{- $javaMaxHeapInMegabytes := (mulf (.Values.keycloak.resources.limits.memory | trimSuffix "Mi") 0.75 | ceil) -}}
+
+# manifests
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $fullname }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  serviceName: {{ $serviceName }}
+  selector:
+    matchLabels:
+      {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "keycloak.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "keycloak.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+      {{- with .Values.keycloak }}
+      - name: quarkus-config
+        configMap:
+          name: {{ .quarkusConfig.configMapName | default (printf "%s-quarkus-config-generated" $fullname) }}
+      - name: tls
+        secret:
+          secretName: {{ .tls.secretName | default (printf "%s-internal-tls" $serviceName) }}
+          defaultMode: 0640
+      containers:
+      - name: keycloak
+        image: "{{ .image.repository }}:{{ .image.tag }}"
+        imagePullPolicy: {{ .image.pullPolicy }}
+        args:
+        - start
+        {{- with .optimized }}
+        - --optimized
+        {{- end }}{{/* optimized */}}
+        env:
+        - name: KC_FEATURES
+          value: >-
+            token-exchange,admin-fine-grained-authz
+        - name: KC_HOSTNAME
+          value: {{ .hostname | quote }}
+        - name: KC_HOSTNAME_STRICT_BACKCHANNEL
+          value: 'true'
+        - name: KC_HOSTNAME_ADMIN
+          value: {{ .hostnameAdmin | quote }}
+        - name: KC_HTTPS_CERTIFICATE_FILE
+          value: /certs/tls.crt
+        - name: KC_HTTPS_CERTIFICATE_KEY_FILE
+          value: /certs/tls.key
+        - name: KC_PROXY
+          value: 'edge'
+        # https://www.keycloak.org/server/reverseproxy
+        - name: KC_SPI_STICKY_SESSION_ENCODER_INFINISPAN_SHOULD_ATTACH_ROUTE
+          value: 'false'
+        # enable plain HTTP for internal network (so that proxy can terminate SSL)   
+        - name: KC_HTTP_ENABLED
+          value: 'true'
+        - name: KC_DB
+          value: 'postgres'
+        - name: KC_DB_URL
+          value: {{ .database.url | quote }}
+        - name: KC_DB_USERNAME
+          value: {{ .database.username | quote }}
+        # //www.keycloak.org/server/configuration#_setup_of_the_initial_admin_user  
+        - name: KC_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .database.password.secretName | default (printf "%s-database-password" $fullname) }}
+              key: password
+        - name: KEYCLOAK_ADMIN
+          value: {{ .admin.username | quote }}
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .admin.password.secretName | default (printf "%s-admin-password" $fullname) }}
+              key: password
+        - name: KC_METRICS_ENABLED
+          value: 'true'
+        - name: KC_HEALTH_ENABLED
+          value: 'true'
+        # JAVA_OPTS are taken from kc.sh
+        - name: JAVA_OPTS 
+          value: >-
+            -Xms128m -Xmx{{ $javaMaxHeapInMegabytes }}m 
+            -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m 
+            -Djava.net.preferIPv4Stack=true 
+            -Dfile.encoding=UTF-8 
+            -Dsun.stdout.encoding=UTF-8 
+            -Dsun.err.encoding=UTF-8 
+            -Dstdout.encoding=UTF-8 
+            -Dstderr.encoding=UTF-8
+        # https://www.keycloak.org/server/caching#_configuring_caches
+        - name: KC_CACHE 
+          value: 'ispn'
+        - name: KC_CACHE_STACK
+          value: 'kubernetes' 
+         # needed when cache stack is "kubernetes" (using JGroups DNS_PING method for discovery of cluster nodes)
+         # see https://stackoverflow.com/a/70291244/1943126
+        - name: JAVA_OPTS_APPEND
+          value: >-
+            -Djgroups.dns.query={{ $serviceFQName }}
+            -Djgroups.bind_addr=NON_LOOPBACK
+        volumeMounts:
+        - name: quarkus-config
+          mountPath: /opt/keycloak/conf/quarkus.properties
+          subPath: quarkus.properties
+          readOnly: true
+        - name: tls
+          mountPath: /certs
+          readOnly: true
+        ports:
+        - name: http-alt
+          containerPort: 8080
+        - name: https-alt
+          containerPort: 8443
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          failureThreshold: {{ .readinessProbe.failureThreshold }}
+          periodSeconds: {{ .readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .readinessProbe.initialDelaySeconds }}
+      {{- end }}{{/* with .Values.keycloak */}}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+

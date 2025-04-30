@@ -1,0 +1,3 @@
+[submodule "charts/postgresql-cluster"]
+	path = charts/postgresql-cluster
+	url = https://github.com/OpertusMundi/postgresql-cluster.helm

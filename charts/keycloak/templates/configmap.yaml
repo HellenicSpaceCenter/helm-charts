@@ -1,0 +1,9 @@
+# vim: set filetype=helm:
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "keycloak.fullname" . }}-quarkus-config-generated
+data:
+  quarkus.properties: |+
+    {{- .Files.Get "files/config/quarkus.properties" | nindent 4 }}
+

@@ -1,0 +1,22 @@
+# vim: set syntax=helm:
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "keycloak.serviceName" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - port: 8080
+    name: http-alt
+    protocol: TCP
+    targetPort: 8080
+  - port: 8443
+    name: https-alt
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    {{- include "keycloak.selectorLabels" . | nindent 4 }}

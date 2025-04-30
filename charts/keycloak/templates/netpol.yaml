@@ -1,0 +1,29 @@
+# vim: set syntax=helm: 
+
+{{- if .Values.netpol.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "keycloak.fullname" . }} 
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  ingress:
+    {{- with .Values.netpol.ingress.ingressController }}
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              {{- .matchLabelsForNamespace | toYaml | nindent 14 }}
+          podSelector:
+            matchLabels:
+              {{- .matchLabelsForPod | toYaml | nindent 14 }}
+    {{- end }}{{/* .Values.netpol.ingress.ingressController */}}
+    - from:
+        # in same namespace as netpol 
+        - podSelector:
+            matchLabels:
+              {{- include "keycloak.selectorLabels" . | nindent 14 }}
+{{- end }}{{/* .Values.netpol.enabled */}}

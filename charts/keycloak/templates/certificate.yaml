@@ -1,0 +1,36 @@
+# vim: set syntax=helm:
+
+{{ $serviceName := (include "keycloak.serviceName" .) -}}
+{{ $serviceDomain := (include "keycloak.serviceDomain" .) -}}
+
+# manifests
+
+{{- if not .Values.keycloak.tls.secretName }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ printf "%s-internal" $serviceName }}
+  labels:
+    {{- include "keycloak.hookLabels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+spec:
+  secretName: {{ printf "%s-internal-tls" $serviceName }}
+  duration: 17280h
+  renewBefore: 120h 
+  commonName: 
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+  - server auth
+  dnsNames:
+  - {{ $serviceName }}
+  - {{ printf "%s.%s" $serviceName $serviceDomain }}
+  issuerRef:
+    name: {{ .Values.keycloak.tls.issuerName | default "internal-ca" }}
+    kind: {{ .Values.keycloak.tls.issuerKind | default "ClusterIssuer" }}
+{{- end }}{{/* if not .Values.keycloak.tls.secretName */}}

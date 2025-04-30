@@ -1,0 +1,105 @@
+replicaCount: 2
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+
+securityContext: {}
+
+# the (headless) service that governs the statefulset
+serviceName: 
+
+keycloak:
+  image:
+    repository: quay.io/keycloak/keycloak 
+    pullPolicy: IfNotPresent
+    tag: "21.1.2"
+  # start server in optimized mode (assumes quarkus JAR is pre-built)
+  optimized: false
+  # TLS configuration
+  tls:
+    #secretName:
+    ## or ...
+    #issuerName:
+    #issuerKind:
+  # configuration for Quarkus
+  quarkusConfig:
+    configMapName:
+  # external hostname  
+  hostname: iam.example.net  
+  hostnameAdmin: webadm.iam.example.net
+  # admin user to be created on startup
+  admin:
+    username: admin
+    password:
+      secretName:
+  database:
+    url: jdbc:postgresql://postgres.default.svc.cluster.local.:5432/keycloak
+    username: keycloak
+    password:
+      secretName: 
+  readinessProbe:
+    failureThreshold: 4
+    periodSeconds: 60
+    initialDelaySeconds: 20
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1024Mi
+    limits:
+      cpu: 1500m
+      memory: 2048Mi
+
+netpol:
+  enabled: false
+  ingress:
+    # allow ingress traffic from ingress controller 
+    ingressController:
+      matchLabelsForNamespace:
+        kubernetes.io/metadata.name: ingress-nginx
+      matchLabelsForPod:
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/instance: ingress-nginx
+        app.kubernetes.io/name: ingress-nginx
+
+# NOTE Currently, only Nginx ingress is supported
+ingress:
+  enabled: false
+  extraAnnotations:
+    #kubernetes.io/tls-acme: "true"
+  tls:
+    secretName:
+  adminRestricted:
+    whitelist: "127.0.0.1/8"
+
+ingressAdmin:
+  enabled: false
+  extraAnnotations:
+    #kubernetes.io/tls-acme: "true"
+  tls:
+    secretName:
+  clientAuth:
+    # max verification depth
+    verifyDepth: 1
+    certificateAuthority:
+      # An opaque secret with a `ca.crt` entry containing the authority certificate
+      secretName:
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
