@@ -1,0 +1,36 @@
+apiVersion: v1
+entries:
+  keycloak:
+  - apiVersion: v2
+    appVersion: "22.0"
+    created: "2025-04-30T15:10:49.5766004+03:00"
+    description: A Helm chart for a Keycloak cluster
+    digest: c6609f6771713e446988a7c376f88b24ff450f47c6f1e806bc043bcb6780995e
+    name: keycloak
+    type: application
+    urls:
+    - keycloak-0.2.0.tgz
+    version: 0.2.0
+  postgresql-cluster:
+  - apiVersion: v2
+    appVersion: "15"
+    created: "2025-04-30T15:10:49.577928205+03:00"
+    description: A Helm chart for a PostgreSQL master/standby cluster
+    digest: 0dfda94a827cda5f934848f7cb90e37275c845effec12bc99372d62873795f04
+    name: postgresql-cluster
+    type: application
+    urls:
+    - postgresql-cluster-0.4.7.tgz
+    version: 0.4.7
+  rm-resource-catalogue:
+  - apiVersion: v2
+    appVersion: 3.0.0
+    created: "2025-04-30T15:10:49.578660205+03:00"
+    description: A Helm chart for Resource Catalogue
+    digest: c66d6fba056f0cd43cc8a4959f349f724878e4143037f9c74b0354a7bb175895
+    name: rm-resource-catalogue
+    type: application
+    urls:
+    - rm-resource-catalogue-2.0.0-beta1.tgz
+    version: 2.0.0-beta1
+generated: "2025-04-30T15:10:49.575857501+03:00"
