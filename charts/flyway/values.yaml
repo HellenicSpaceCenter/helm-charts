@@ -1,0 +1,96 @@
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+jobAnnotations: {}
+jobBackoffLimit: 1
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+checkout:
+  image: 
+    repository: bitnami/git
+    pullPolicy: IfNotPresent
+    tag: 2.35.3
+  securityContext:
+    # uid/gid of bitnami user
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    capabilities:
+      drop: [ 'ALL' ]
+    allowPrivilegeEscalation: false  
+  # home of bitnami user
+  homeDir: /home/bitnami
+  # name of the secret holding the SSH key (as "ssh-privatekey") for the Git repository
+  sshKey: 
+    secretName: ssh-key
+  # name of the configmap holding a known-hosts file (as "ssh_known_hosts") for connecting to the Git host
+  knownHosts: 
+    configMapName: ssh-known-hosts
+  # target repository with SQL migrations
+  repository:
+    url: git@github.com:example/helloworld.git
+    branch: master
+    path: src/main/resources/db/migration
+
+# mimic this feature (not available in community edition): 
+# https://documentation.red-gate.com/fd/flyway-ignore-migration-patterns-setting-277579002.html
+ignoreRepeatableMigrations: false
+
+flyway:
+  image:
+    repository: flyway/flyway
+    pullPolicy: IfNotPresent
+    tag: "9.15"
+  securityContext:
+    capabilities:
+      drop: [ 'ALL' ]
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    #runAsUser: 1000
+    #runAsNonRoot: true
+  # Flyway subcommand to execute (info, migrate, validate)   
+  command: "info"
+  # Flyway configuration
+  schemas: "public"
+  defaultSchema: "public"
+  table: "_schema_version"
+  baselineVersion: "1_0_0"
+  baselineOnMigrate: true
+  # database connection URL
+  url: >-  
+    jdbc:postgresql://postgres.default.svc.cluster.local/helloworld?
+  # database user
+  user: postgres
+  # ref to secret key holding the password for the database user
+  password:
+    secretKeyRef:
+      name: postgres-password
+      key: password
