@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - run: >-
-        sed -n -E 's/^FROM[[:space:]]+quay.io[/]keycloak[/]keycloak:([0-9]+([.][0-9]+){1,2})/\1/p' keycloak/keycloak/Dockerfile
+        sed -n -E 's/^FROM[[:space:]]+quay.io[/]keycloak[/]keycloak:([0-9]+([.][0-9]+){1,2})/\1/p' charts/keycloak/keycloak/Dockerfile
         | tee keycloak-version
     - run: |-
         echo keycloak_version="$(< keycloak-version)" >> $GITHUB_ENV
