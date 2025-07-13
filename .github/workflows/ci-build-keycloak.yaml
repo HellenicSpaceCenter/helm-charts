@@ -37,8 +37,8 @@ jobs:
         Build Keycloak image (JGroups discovery mechanism: UDP multicast)
       uses: docker/build-push-action@v4
       with:
-        context: ./keycloak/keycloak
-        file: keycloak/keycloak/Dockerfile
+        context: ./charts/keycloak/keycloak
+        file: charts/keycloak/keycloak/Dockerfile
         build-args: |
           kc_cache_stack=udp
         push: true
@@ -51,8 +51,8 @@ jobs:
         Build Keycloak image (JGroups discovery mechanism: DNS_PING)
       uses: docker/build-push-action@v4
       with:
-        context: ./keycloak/keycloak
-        file: keycloak/keycloak/Dockerfile
+        context: ./charts/keycloak/keycloak
+        file: charts/keycloak/keycloak/Dockerfile
         build-args: |
           kc_cache_stack=kubernetes
         push: true
