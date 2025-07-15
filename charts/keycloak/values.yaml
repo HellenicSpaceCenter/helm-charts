@@ -26,7 +26,7 @@ keycloak:
   image:
     repository: quay.io/keycloak/keycloak 
     pullPolicy: IfNotPresent
-    tag: "21.1.2"
+    tag: "24.0.5"
   # start server in optimized mode (assumes quarkus JAR is pre-built)
   optimized: false
   # TLS configuration
@@ -35,12 +35,17 @@ keycloak:
     ## or ...
     #issuerName:
     #issuerKind:
+  # persistence for transaction logs
+  data:
+    size: 1Gi
+    storageClassName: local-path
   # configuration for Quarkus
   quarkusConfig:
     configMapName:
   # external hostname  
   hostname: iam.example.net  
   hostnameAdmin: webadm.iam.example.net
+  #proxyTrustedAddresses: '172.19.0.0/16'
   # additional env variables (e.g for HTTP_PROXY)
   extraEnv:
     []

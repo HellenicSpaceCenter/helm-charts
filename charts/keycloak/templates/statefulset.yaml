@@ -20,6 +20,20 @@ spec:
   selector:
     matchLabels:
       {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  
+  volumeClaimTemplates:
+  {{- with .Values.keycloak.data }}
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .size }}
+      storageClassName: {{ .storageClassName }}
+      volumeMode: Filesystem
+  {{- end }}{{/* with .Values.keycloak.data */}}    
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -68,8 +82,12 @@ spec:
           value: /certs/tls.crt
         - name: KC_HTTPS_CERTIFICATE_KEY_FILE
           value: /certs/tls.key
-        - name: KC_PROXY
-          value: 'edge'
+        - name: KC_PROXY_HEADERS
+          value: xforwarded
+        {{- with .proxyTrustedAddresses }}
+        - name: KC_PROXY_TRUSTED_ADDRESSES
+          value: {{ . | quote }}
+        {{- end }}{{/* with .proxyTrustedAddresses */}}
         # https://www.keycloak.org/server/reverseproxy
         - name: KC_SPI_STICKY_SESSION_ENCODER_INFINISPAN_SHOULD_ATTACH_ROUTE
           value: 'false'
@@ -126,6 +144,8 @@ spec:
           value: {{ $e.value | quote }}
         {{- end }}{{/* range .extraEnv */}}
         volumeMounts:
+        - name: data
+          mountPath: /opt/keycloak/data
         - name: quarkus-config
           mountPath: /opt/keycloak/conf/quarkus.properties
           subPath: quarkus.properties
