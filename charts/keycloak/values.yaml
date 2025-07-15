@@ -41,6 +41,9 @@ keycloak:
   # external hostname  
   hostname: iam.example.net  
   hostnameAdmin: webadm.iam.example.net
+  # additional env variables (e.g for HTTP_PROXY)
+  extraEnv:
+    []
   # admin user to be created on startup
   admin:
     username: admin

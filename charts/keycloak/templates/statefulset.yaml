@@ -121,6 +121,10 @@ spec:
           value: >-
             -Djgroups.dns.query={{ $serviceFQName }}
             -Djgroups.bind_addr=NON_LOOPBACK
+        {{- range $e := .extraEnv }}
+        - name: {{ $e.name }}
+          value: {{ $e.value | quote }}
+        {{- end }}{{/* range .extraEnv */}}
         volumeMounts:
         - name: quarkus-config
           mountPath: /opt/keycloak/conf/quarkus.properties
