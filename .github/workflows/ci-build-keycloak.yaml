@@ -21,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - run: >-
-        sed -n -E 's/^FROM[[:space:]]+quay.io[/]keycloak[/]keycloak:([0-9]+([.][0-9]+){1,2})/\1/p' charts/keycloak/keycloak/Dockerfile
+        sed -n -E 's/^FROM[[:space:]]+quay.io[/]keycloak[/]keycloak:([0-9]+([.][0-9]+){1,2})/\1/p' charts/keycloak/keycloak/base.dockerfile
         | tee keycloak-version
     - run: |-
         echo keycloak_version="$(< keycloak-version)" >> $GITHUB_ENV
@@ -36,15 +36,16 @@ jobs:
     - uses: docker/setup-buildx-action@v3
       with:
         driver: docker
-    - uses: docker/bake-action@v4
+    - uses: docker/bake-action@v6
       with:
-        targets: 'default' 
+        workdir: ./charts/keycloak/keycloak
+        source: .
+        files: docker-bake.hcl
+        targets: >-
+          default,default-on-kubernetes,keycloak-idp-oauth2,keycloak-idp-oauth2-on-kubernetes
         push: true
         set: |
           default.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}
-    - uses: docker/bake-action@v4
-      with:
-        targets: 'default-on-kubernetes' 
-        push: true
-        set: |
-          default.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-on-kubernetes
+          default-on-kubernetes.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-on-kubernetes
+          keycloak-idp-oauth2.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-oauth2
+          keycloak-idp-oauth2-on-kubernetes.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-oauth2-on-kubernetes
