@@ -8,8 +8,15 @@ on:
     tags:
     - '*'
 
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  packages: write
+  repository-projects: read
+  statuses: read
+
 jobs:
-  
   build_image:
     runs-on: ubuntu-22.04
     steps:
