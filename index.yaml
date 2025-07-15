@@ -3,7 +3,7 @@ entries:
   flyway:
   - apiVersion: v2
     appVersion: "9"
-    created: "2025-06-19T11:44:15.003162919+03:00"
+    created: "2025-07-15T10:08:15.078400653+03:00"
     description: A Helm chart for applying database migrations with Flyway
     digest: 709f6a195ac1af8d1930fc44916926390b0746bbe1fdcae2a5f936742ff576eb
     name: flyway
@@ -14,7 +14,17 @@ entries:
   keycloak:
   - apiVersion: v2
     appVersion: "22.0"
-    created: "2025-06-19T11:44:15.003609831+03:00"
+    created: "2025-07-15T10:08:15.080449653+03:00"
+    description: A Helm chart for a Keycloak cluster
+    digest: 9bb4f2e0cd806f69649bfe1362511c72dbb47eae6fb032d14202e35fff5dedbd
+    name: keycloak
+    type: application
+    urls:
+    - keycloak-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
+    appVersion: "22.0"
+    created: "2025-07-15T10:08:15.079653238+03:00"
     description: A Helm chart for a Keycloak cluster
     digest: c6609f6771713e446988a7c376f88b24ff450f47c6f1e806bc043bcb6780995e
     name: keycloak
@@ -25,7 +35,7 @@ entries:
   postgresql-cluster:
   - apiVersion: v2
     appVersion: "15"
-    created: "2025-06-19T11:44:15.004647492+03:00"
+    created: "2025-07-15T10:08:15.082934636+03:00"
     description: A Helm chart for a PostgreSQL master/standby cluster
     digest: c4c1a7e4e2dd7f939a16d18b51d149b26d1d5612b21d92c2e1feecd37989d139
     name: postgresql-cluster
@@ -36,7 +46,7 @@ entries:
   rm-resource-catalogue:
   - apiVersion: v2
     appVersion: 3.0.0
-    created: "2025-06-19T11:44:15.005223433+03:00"
+    created: "2025-07-15T10:08:15.083712495+03:00"
     description: A Helm chart for Resource Catalogue
     digest: c66d6fba056f0cd43cc8a4959f349f724878e4143037f9c74b0354a7bb175895
     name: rm-resource-catalogue
@@ -44,4 +54,4 @@ entries:
     urls:
     - rm-resource-catalogue-2.0.0-beta1.tgz
     version: 2.0.0-beta1
-generated: "2025-06-19T11:44:15.002644971+03:00"
+generated: "2025-07-15T10:08:15.077191733+03:00"
