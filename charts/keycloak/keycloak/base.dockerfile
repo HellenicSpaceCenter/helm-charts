@@ -11,5 +11,3 @@ ENV \
     KC_HEALTH_ENABLED="true" \
     KC_CACHE="ispn" \
     KC_CACHE_STACK=${kc_cache_stack}
-
-RUN /opt/keycloak/bin/kc.sh build

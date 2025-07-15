@@ -1,5 +1,4 @@
 name: CI - Build keycloak image
-run-name: Run continuous-integration tasks for Keycloak
 
 on: 
   push:
@@ -34,38 +33,18 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - uses: docker/metadata-action@v4
-      id: meta
+    - uses: docker/setup-buildx-action@v3
       with:
-        images: |
-          ghcr.io/hellenicspacecenter/keycloak
-    - uses: docker/setup-buildx-action@v2
-    - name: >-
-        Build Keycloak image (JGroups discovery mechanism: UDP multicast)
-      uses: docker/build-push-action@v4
+        driver: docker
+    - uses: docker/bake-action@v4
       with:
-        context: ./charts/keycloak/keycloak
-        file: charts/keycloak/keycloak/Dockerfile
-        build-args: |
-          kc_cache_stack=udp
+        targets: 'default' 
         push: true
-        tags: |
-          ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_version }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    - name: >-
-        Build Keycloak image (JGroups discovery mechanism: DNS_PING)
-      uses: docker/build-push-action@v4
+        set: |
+          default.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}
+    - uses: docker/bake-action@v4
       with:
-        context: ./charts/keycloak/keycloak
-        file: charts/keycloak/keycloak/Dockerfile
-        build-args: |
-          kc_cache_stack=kubernetes
+        targets: 'default-on-kubernetes' 
         push: true
-        tags: |
-          ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_version }}-on-kubernetes
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
+        set: |
+          default.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-on-kubernetes
