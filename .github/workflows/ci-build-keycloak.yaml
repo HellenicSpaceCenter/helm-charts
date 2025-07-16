@@ -42,10 +42,10 @@ jobs:
         source: .
         files: docker-bake.hcl
         targets: >-
-          default,default-on-kubernetes,keycloak-idp-oauth2,keycloak-idp-oauth2-on-kubernetes
+          default,default-on-kubernetes,keycloak-gsis-providers,keycloak-gsis-providers-on-kubernetes
         push: true
         set: |
           default.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}
           default-on-kubernetes.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-on-kubernetes
-          keycloak-idp-oauth2.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-oauth2
-          keycloak-idp-oauth2-on-kubernetes.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-oauth2-on-kubernetes
+          keycloak-gsis-providers.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-gsis-providers
+          keycloak-gsis-providers-on-kubernetes.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-gsis-providers-on-kubernetes
