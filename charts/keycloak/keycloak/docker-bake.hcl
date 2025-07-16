@@ -62,3 +62,25 @@ target "keycloak-idp-oauth2-on-kubernetes" {
   ]
 }
 
+target "keycloak-gsis-providers" {
+  context = "."
+  dockerfile = "./keycloak-gsis-providers.dockerfile"
+  contexts = {
+    "base" = "target:base"
+  }
+  tags = [
+    "ghcr.io/hellenicspacecenter/keycloak:keycloak-gsis-providers",
+  ]
+}
+
+target "keycloak-gsis-providers-on-kubernetes" {
+  context = "."
+  dockerfile = "./keycloak-gsis-providers.dockerfile"
+  contexts = {
+    "base" = "target:base-on-kubernetes"
+  }
+  tags = [
+    "ghcr.io/hellenicspacecenter/keycloak:keycloak-gsis-providers-on-kubernetes",
+  ]
+}
+
