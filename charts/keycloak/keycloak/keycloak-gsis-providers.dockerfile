@@ -5,7 +5,6 @@ ARG keycloak_gsis_providers_version=v3.1.0-keycloak-26
 
 WORKDIR /code
 ADD https://github.com/HellenicSpaceCenter/keycloak-gsis-providers/archive/refs/tags/${keycloak_gsis_providers_version}.tar.gz . 
-ADD keycloak-gsis-providers.diff .
 RUN tar xzf ${keycloak_gsis_providers_version}.tar.gz --strip-components=1 && \
   mvn package
 
