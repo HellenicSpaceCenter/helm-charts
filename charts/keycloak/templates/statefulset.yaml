@@ -72,11 +72,11 @@ spec:
         - name: KC_FEATURES
           value: >-
             token-exchange,admin-fine-grained-authz
-        - name: KC_HOSTNAME
+        - name: KC_HOSTNAME_URL
           value: {{ .hostname | quote }}
-        - name: KC_HOSTNAME_STRICT_BACKCHANNEL
+        - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
           value: 'true'
-        - name: KC_HOSTNAME_ADMIN
+        - name: KC_HOSTNAME_ADMIN_URL
           value: {{ .hostnameAdmin | quote }}
         - name: KC_HTTPS_CERTIFICATE_FILE
           value: /certs/tls.crt

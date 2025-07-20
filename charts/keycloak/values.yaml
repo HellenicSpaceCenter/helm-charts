@@ -26,7 +26,7 @@ keycloak:
   image:
     repository: quay.io/keycloak/keycloak 
     pullPolicy: IfNotPresent
-    tag: "24.0.5"
+    tag: "26.3"
   # start server in optimized mode (assumes quarkus JAR is pre-built)
   optimized: false
   # TLS configuration

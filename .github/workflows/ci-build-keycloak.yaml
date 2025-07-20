@@ -1,5 +1,4 @@
 name: CI - Build keycloak image
-run-name: Run continuous-integration tasks for Keycloak
 
 on: 
   push:
@@ -8,14 +7,21 @@ on:
     tags:
     - '*'
 
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  packages: write
+  repository-projects: read
+  statuses: read
+
 jobs:
-  
   build_image:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
     - run: >-
-        sed -n -E 's/^FROM[[:space:]]+quay.io[/]keycloak[/]keycloak:([0-9]+([.][0-9]+){1,2})/\1/p' charts/keycloak/keycloak/Dockerfile
+        sed -n -E 's/^FROM[[:space:]]+quay.io[/]keycloak[/]keycloak:([0-9]+([.][0-9]+){1,2})/\1/p' charts/keycloak/keycloak/base.dockerfile
         | tee keycloak-version
     - run: |-
         echo keycloak_version="$(< keycloak-version)" >> $GITHUB_ENV
@@ -27,38 +33,19 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - uses: docker/metadata-action@v4
-      id: meta
+    - uses: docker/setup-buildx-action@v3
       with:
-        images: |
-          ghcr.io/hellenicspacecenter/keycloak
-    - uses: docker/setup-buildx-action@v2
-    - name: >-
-        Build Keycloak image (JGroups discovery mechanism: UDP multicast)
-      uses: docker/build-push-action@v4
+        driver: docker
+    - uses: docker/bake-action@v6
       with:
-        context: ./charts/keycloak/keycloak
-        file: charts/keycloak/keycloak/Dockerfile
-        build-args: |
-          kc_cache_stack=udp
+        workdir: ./charts/keycloak/keycloak
+        source: .
+        files: docker-bake.hcl
+        targets: >-
+          default,default-on-kubernetes,keycloak-gsis-providers,keycloak-gsis-providers-on-kubernetes
         push: true
-        tags: |
-          ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_version }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    - name: >-
-        Build Keycloak image (JGroups discovery mechanism: DNS_PING)
-      uses: docker/build-push-action@v4
-      with:
-        context: ./charts/keycloak/keycloak
-        file: charts/keycloak/keycloak/Dockerfile
-        build-args: |
-          kc_cache_stack=kubernetes
-        push: true
-        tags: |
-          ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_version }}-on-kubernetes
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
+        set: |
+          default.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}
+          default-on-kubernetes.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-on-kubernetes
+          keycloak-gsis-providers.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-gsis-providers
+          keycloak-gsis-providers-on-kubernetes.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-gsis-providers-on-kubernetes
