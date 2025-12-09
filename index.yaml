@@ -3,7 +3,17 @@ entries:
   flyway:
   - apiVersion: v2
     appVersion: "9"
-    created: "2025-11-22T12:18:32.970435009+02:00"
+    created: "2025-12-09T15:35:53.428647083+02:00"
+    description: A Helm chart for applying database migrations with Flyway
+    digest: b73d3751ad429c39f23b517adab8ad858f54965217be57ad5dcd36ee08b449cb
+    name: flyway
+    type: application
+    urls:
+    - flyway-0.7.0.tgz
+    version: 0.7.0
+  - apiVersion: v2
+    appVersion: "9"
+    created: "2025-12-09T15:35:53.427800754+02:00"
     description: A Helm chart for applying database migrations with Flyway
     digest: 709f6a195ac1af8d1930fc44916926390b0746bbe1fdcae2a5f936742ff576eb
     name: flyway
@@ -14,7 +24,7 @@ entries:
   keycloak:
   - apiVersion: v2
     appVersion: "26.3"
-    created: "2025-11-22T12:18:32.972816295+02:00"
+    created: "2025-12-09T15:35:53.433679636+02:00"
     description: A Helm chart for a Keycloak cluster
     digest: 1a1d34542a172a82244f968f3f3835385d5fe98f7b25962878e29b27a39d10bc
     name: keycloak
@@ -24,7 +34,7 @@ entries:
     version: 0.5.2
   - apiVersion: v2
     appVersion: "26.3"
-    created: "2025-11-22T12:18:32.972288392+02:00"
+    created: "2025-12-09T15:35:53.433053085+02:00"
     description: A Helm chart for a Keycloak cluster
     digest: a1bdf238774680100d90a5b53e98bf1150fbafcd44504da6b2fac701141b9906
     name: keycloak
@@ -34,7 +44,7 @@ entries:
     version: 0.5.1
   - apiVersion: v2
     appVersion: "24.0"
-    created: "2025-11-22T12:18:32.971786298+02:00"
+    created: "2025-12-09T15:35:53.432418535+02:00"
     description: A Helm chart for a Keycloak cluster
     digest: 0a4c07eb0443a846df0c1e83d6dcff37369b0c4f1a502d4496368cb06df8c642
     name: keycloak
@@ -44,7 +54,7 @@ entries:
     version: 0.4.0
   - apiVersion: v2
     appVersion: "22.0"
-    created: "2025-11-22T12:18:32.971325319+02:00"
+    created: "2025-12-09T15:35:53.431815063+02:00"
     description: A Helm chart for a Keycloak cluster
     digest: 9bb4f2e0cd806f69649bfe1362511c72dbb47eae6fb032d14202e35fff5dedbd
     name: keycloak
@@ -54,7 +64,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: "22.0"
-    created: "2025-11-22T12:18:32.970874008+02:00"
+    created: "2025-12-09T15:35:53.430234036+02:00"
     description: A Helm chart for a Keycloak cluster
     digest: c6609f6771713e446988a7c376f88b24ff450f47c6f1e806bc043bcb6780995e
     name: keycloak
@@ -65,7 +75,7 @@ entries:
   postgresql-cluster:
   - apiVersion: v2
     appVersion: "15"
-    created: "2025-11-22T12:18:32.973878524+02:00"
+    created: "2025-12-09T15:35:53.434948198+02:00"
     description: A Helm chart for a PostgreSQL master/standby cluster
     digest: c4c1a7e4e2dd7f939a16d18b51d149b26d1d5612b21d92c2e1feecd37989d139
     name: postgresql-cluster
@@ -76,7 +86,7 @@ entries:
   rm-resource-catalogue:
   - apiVersion: v2
     appVersion: 3.0.0
-    created: "2025-11-22T12:18:32.974513659+02:00"
+    created: "2025-12-09T15:35:53.435618615+02:00"
     description: A Helm chart for Resource Catalogue
     digest: c66d6fba056f0cd43cc8a4959f349f724878e4143037f9c74b0354a7bb175895
     name: rm-resource-catalogue
@@ -84,4 +94,4 @@ entries:
     urls:
     - rm-resource-catalogue-2.0.0-beta1.tgz
     version: 2.0.0-beta1
-generated: "2025-11-22T12:18:32.969956796+02:00"
+generated: "2025-12-09T15:35:53.427030667+02:00"
