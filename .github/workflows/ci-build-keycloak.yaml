@@ -1,0 +1,51 @@
+name: CI - Build keycloak image
+
+on: 
+  push:
+    branches:
+    - 'keycloak'
+    tags:
+    - '*'
+
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  packages: write
+  repository-projects: read
+  statuses: read
+
+jobs:
+  build_image:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - run: >-
+        sed -n -E 's/^FROM[[:space:]]+quay.io[/]keycloak[/]keycloak:([0-9]+([.][0-9]+){1,2})/\1/p' charts/keycloak/keycloak/base.dockerfile
+        | tee keycloak-version
+    - run: |-
+        echo keycloak_version="$(< keycloak-version)" >> $GITHUB_ENV
+        echo keycloak_major_version="$(sed -n -E 's/^([0-9]+)[.].*/\1/p' keycloak-version)" >> $GITHUB_ENV
+    - run: env | sort
+    - run: echo ${{ env.keycloak_version }}
+    - uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - uses: docker/setup-buildx-action@v3
+      with:
+        driver: docker
+    - uses: docker/bake-action@v6
+      with:
+        workdir: ./charts/keycloak/keycloak
+        source: .
+        files: docker-bake.hcl
+        targets: >-
+          default,default-on-kubernetes,keycloak-gsis-providers,keycloak-gsis-providers-on-kubernetes
+        push: true
+        set: |
+          default.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}
+          default-on-kubernetes.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-on-kubernetes
+          keycloak-gsis-providers.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-gsis-providers
+          keycloak-gsis-providers-on-kubernetes.tags=ghcr.io/hellenicspacecenter/keycloak:${{ github.ref_name }}-${{ env.keycloak_major_version }}-gsis-providers-on-kubernetes
