@@ -17,7 +17,14 @@ podSecurityContext:
   fsGroup: 1000
   fsGroupChangePolicy: OnRootMismatch
 
-securityContext: {}
+securityContext:
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  #readOnlyRootFilesystem: true
+  seccompProfile:
+    type: RuntimeDefault
 
 # the (headless) service that governs the statefulset
 serviceName: 
@@ -49,6 +56,12 @@ keycloak:
   # additional env variables (e.g for HTTP_PROXY)
   extraEnv:
     []
+  # download a custom theme under /opt/keycloak/themes
+  theme:
+    #download:
+    #  url: https://github.com/Acme/keycloak-theme/archive/refs/heads/master.tar.gz
+    #  stripComponents: 1
+    #  path:
   # admin user to be created on startup
   admin:
     username: admin
@@ -70,6 +83,12 @@ keycloak:
     limits:
       cpu: 1500m
       memory: 2048Mi
+  extraVolumes:
+    []
+  extraVolumeMounts:
+    []
+  extraInitContainers:
+    []
 
 netpol:
   enabled: false

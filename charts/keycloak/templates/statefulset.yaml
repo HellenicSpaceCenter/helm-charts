@@ -5,6 +5,8 @@
 {{- $serviceDomain := (include "keycloak.serviceDomain" .) -}}
 {{- $serviceFQName := (printf "%s.%s" $serviceName $serviceDomain) }}
 {{- $javaMaxHeapInMegabytes := (mulf (.Values.keycloak.resources.limits.memory | trimSuffix "Mi") 0.75 | ceil) -}}
+{{- $podSecurityContext := .Values.podSecurityContext }}
+{{- $securityContext := .Values.securityContext }}
 
 # manifests
 
@@ -49,7 +51,8 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "keycloak.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- toYaml $podSecurityContext | nindent 8 }}
+
       volumes:
       {{- with .Values.keycloak }}
       - name: quarkus-config
@@ -59,6 +62,48 @@ spec:
         secret:
           secretName: {{ .tls.secretName | default (printf "%s-internal-tls" $serviceName) }}
           defaultMode: 0640
+      {{- with .theme }}
+      - name: themes
+        emptyDir: {}
+      {{- end }}{{/* with .theme */}}
+      {{- with .extraVolumes }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}{{/* with .extraVolumes */}}
+      
+      initContainers:
+      {{- if .theme }}
+      - name: download-theme
+        image: curlimages/curl:8.17.0
+        securityContext:
+          {{- toYaml $securityContext | nindent 10 }}
+        env:
+        - name: _ARCHIVE_DOWNLOAD_URL
+          value: {{ .theme.download.url }}
+        - name: _ARCHIVE_PATH
+          value: {{ .theme.download.path | default "" | squote }}
+        - name: _ARCHIVE_STRIP_COMPONENTS
+          value: {{ .theme.download.stripComponents | default "1" | squote }}
+        {{- range $e := .extraEnv }}
+        - name: {{ $e.name }}
+          value: {{ $e.value | quote }}
+        {{- end }}{{/* range .extraEnv */}}
+        workingDir: /opt/keycloak/themes
+        command:
+        - sh
+        - -xue
+        - -c
+        args:
+        - >-
+          curl -LsSf ${_ARCHIVE_DOWNLOAD_URL} |
+          tar xzv ${_ARCHIVE_PATH} --strip-components=${_ARCHIVE_STRIP_COMPONENTS}
+        volumeMounts:
+        - name: themes
+          mountPath: /opt/keycloak/themes
+      {{- end }}{{/* if .theme */}}
+      {{- with .extraInitContainers }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}{{/* with .extraInitContainers */}}
+      
       containers:
       - name: keycloak
         image: "{{ .image.repository }}:{{ .image.tag }}"
@@ -68,6 +113,8 @@ spec:
         {{- with .optimized }}
         - --optimized
         {{- end }}{{/* optimized */}}
+        securityContext:
+          {{- toYaml $securityContext | nindent 10 }}
         env:
         - name: KC_HOSTNAME_STRICT
           value: 'false'
@@ -152,6 +199,14 @@ spec:
         - name: tls
           mountPath: /certs
           readOnly: true
+        {{- with .theme }}
+        - name: themes
+          mountPath: /opt/keycloak/themes
+          readOnly: true
+        {{- end }}{{/* with .theme */}}
+        {{- with .extraVolumeMounts }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}{{/* with .extraVolumeMounts */}}
         ports:
         - name: http-alt
           containerPort: 8080
